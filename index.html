@@ -12,8 +12,39 @@
 </head>
 <body>
 
-    <!-- Header Section -->
-    <header>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen-overlay">
+        <div class="glass-card login-card">
+            <div class="login-logo-container">
+                <img src="https://images.squarespace-cdn.com/content/v1/58f9163b725e2543105f893c/1500487299244-JM79GEHPH22A5X46U0ZH/Huge+logo+-bw-small.png" alt="Holy Trinity Logo" class="login-logo-img">
+            </div>
+            <h2>Timesheet Portal Login</h2>
+            <p class="login-subtitle">Holy Trinity Episcopal Church</p>
+            
+            <form id="login-form" onsubmit="handleLoginSubmit(event)">
+                <div class="input-group" style="text-align: left;">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" required placeholder="Enter username" style="width: 100%;">
+                </div>
+                <div class="input-group" style="text-align: left; margin-top: 1rem;">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required placeholder="Enter password" style="width: 100%;">
+                </div>
+                <div id="login-error" class="login-error-msg" style="display: none;">
+                    Invalid username or password. Please try again.
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1.5rem; padding: 0.85rem;">
+                    Sign In to Portal
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App Content Container -->
+    <div id="app-content" style="display: none;">
+
+        <!-- Header Section -->
+        <header>
         <div class="header-container">
             <div class="brand">
                 <img src="https://images.squarespace-cdn.com/content/v1/58f9163b725e2543105f893c/1500487299244-JM79GEHPH22A5X46U0ZH/Huge+logo+-bw-small.png" alt="Holy Trinity Logo" class="brand-logo-img">
@@ -220,6 +251,8 @@
             <div>Parish Administration timesheet portal. Built securely for browser local storage caching.</div>
         </div>
     </footer>
+
+    </div>
 
     <script src="app.js"></script>
 </body>

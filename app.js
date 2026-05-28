@@ -39,10 +39,49 @@ let state = {
 
 let hoursTimerInterval = null;
 
+// Authentication gate checker
+function checkAuthenticationState() {
+    const authState = sessionStorage.getItem("htec_timesheet_auth") === "true";
+    const loginScreen = document.getElementById("login-screen");
+    const appContent = document.getElementById("app-content");
+    
+    if (authState) {
+        if (loginScreen) loginScreen.style.display = "none";
+        if (appContent) appContent.style.display = "block";
+    } else {
+        if (loginScreen) loginScreen.style.display = "flex";
+        if (appContent) appContent.style.display = "none";
+    }
+}
+
+// Authentication login submission handler
+window.handleLoginSubmit = function(event) {
+    event.preventDefault();
+    const usernameInput = document.getElementById("login-username");
+    const passwordInput = document.getElementById("login-password");
+    const errorMsg = document.getElementById("login-error");
+    
+    if (!usernameInput || !passwordInput) return;
+    
+    const user = usernameInput.value.trim();
+    const pass = passwordInput.value;
+    
+    if (user === "admin" && pass === "W2rd0fG0dHTEC08090!") {
+        sessionStorage.setItem("htec_timesheet_auth", "true");
+        if (errorMsg) errorMsg.style.display = "none";
+        usernameInput.value = "";
+        passwordInput.value = "";
+        checkAuthenticationState();
+    } else {
+        if (errorMsg) errorMsg.style.display = "block";
+    }
+};
+
 // Initialize Application
 let calendarDate = new Date();
 
 document.addEventListener("DOMContentLoaded", () => {
+    checkAuthenticationState();
     loadState();
     startLiveSystemClock();
     checkActiveSession();
