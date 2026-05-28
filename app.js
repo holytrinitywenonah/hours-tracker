@@ -146,7 +146,7 @@ window.saveStateCloud = async function() {
     try {
         const encryptedData = encryptPayload(JSON.stringify(state.hoursLogs), AUTH_PASSWORD);
         
-        const response = await fetch("https://kvdb.io/A8v6d91pC3yJ1Q4r8T7zZ9/htec_timesheet_logs", {
+        const response = await fetch("https://kvdb.io/5jGXNWai7sdTCFHwEEt5dE/htec_timesheet_logs", {
             method: "POST",
             headers: {
                 "Content-Type": "text/plain"
@@ -173,7 +173,7 @@ window.saveStateCloud = async function() {
 // Load from cloud with decryption fallback
 async function loadStateCloud() {
     try {
-        const response = await fetch("https://kvdb.io/A8v6d91pC3yJ1Q4r8T7zZ9/htec_timesheet_logs");
+        const response = await fetch("https://kvdb.io/5jGXNWai7sdTCFHwEEt5dE/htec_timesheet_logs");
         if (response.ok) {
             const encryptedText = await response.text();
             if (encryptedText && encryptedText.trim().length > 0) {
