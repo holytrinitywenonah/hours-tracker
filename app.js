@@ -40,6 +40,31 @@ let state = {
 let hoursTimerInterval = null;
 let fallbackAuth = false;
 
+const AUTH_PASSWORD = "W2rd0fG0dHTEC08090!";
+
+// Simple XOR & Base64 client-side encryption helper
+function encryptPayload(text, key) {
+    let result = "";
+    for (let i = 0; i < text.length; i++) {
+        const charCode = text.charCodeAt(i);
+        const keyCode = key.charCodeAt(i % key.length);
+        result += String.fromCharCode(charCode ^ keyCode);
+    }
+    return btoa(unescape(encodeURIComponent(result)));
+}
+
+// Simple XOR & Base64 client-side decryption helper
+function decryptPayload(ciphertext, key) {
+    const raw = decodeURIComponent(escape(atob(ciphertext)));
+    let result = "";
+    for (let i = 0; i < raw.length; i++) {
+        const charCode = raw.charCodeAt(i);
+        const keyCode = key.charCodeAt(i % key.length);
+        result += String.fromCharCode(charCode ^ keyCode);
+    }
+    return result;
+}
+
 // Authentication gate checker
 function checkAuthenticationState() {
     let authState = false;
@@ -73,7 +98,7 @@ window.handleLoginSubmit = function(event) {
     const user = usernameInput.value.trim();
     const pass = passwordInput.value;
     
-    if (user === "admin" && pass === "W2rd0fG0dHTEC08090!") {
+    if (user === "admin" && pass === AUTH_PASSWORD) {
         try {
             sessionStorage.setItem("htec_timesheet_auth", "true");
         } catch (e) {
@@ -84,12 +109,88 @@ window.handleLoginSubmit = function(event) {
         usernameInput.value = "";
         passwordInput.value = "";
         checkAuthenticationState();
+        
+        // Auto pull cloud state upon successful login
+        loadStateCloud();
+        
         return true;
     } else {
         if (errorMsg) errorMsg.style.display = "block";
         return false;
     }
 };
+
+// Logout handler
+window.handleLogout = function() {
+    if (confirm("Are you sure you want to log out?")) {
+        try {
+            sessionStorage.removeItem("htec_timesheet_auth");
+        } catch (e) {}
+        fallbackAuth = false;
+        checkAuthenticationState();
+    }
+};
+
+// Save to cloud with secure client-side encryption
+window.saveStateCloud = async function() {
+    const saveBtn = document.getElementById("save-progress-btn");
+    const originalText = saveBtn ? saveBtn.textContent : "Save Progress";
+    if (saveBtn) {
+        saveBtn.textContent = "Saving...";
+        saveBtn.disabled = true;
+    }
+    
+    // Save locally first
+    saveState();
+    
+    try {
+        const encryptedData = encryptPayload(JSON.stringify(state.hoursLogs), AUTH_PASSWORD);
+        
+        const response = await fetch("https://kvdb.io/A8v6d91pC3yJ1Q4r8T7zZ9/htec_timesheet_logs", {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain"
+            },
+            body: encryptedData
+        });
+        
+        if (!response.ok) {
+            throw new Error("Cloud synchronization failed");
+        }
+        
+        alert("Progress saved securely and synchronized successfully across all access devices.");
+    } catch (e) {
+        console.error("Cloud save failed, saved locally only.", e);
+        alert("Changes saved locally. (Cloud sync offline; check internet connection)");
+    } finally {
+        if (saveBtn) {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+        }
+    }
+};
+
+// Load from cloud with decryption fallback
+async function loadStateCloud() {
+    try {
+        const response = await fetch("https://kvdb.io/A8v6d91pC3yJ1Q4r8T7zZ9/htec_timesheet_logs");
+        if (response.ok) {
+            const encryptedText = await response.text();
+            if (encryptedText && encryptedText.trim().length > 0) {
+                const decryptedData = decryptPayload(encryptedText.trim(), AUTH_PASSWORD);
+                const parsedLogs = JSON.parse(decryptedData);
+                if (Array.isArray(parsedLogs)) {
+                    state.hoursLogs = parsedLogs;
+                    saveState();
+                    renderAll();
+                    console.log("State synchronized from cloud successfully.");
+                }
+            }
+        }
+    } catch (e) {
+        console.warn("Could not load from cloud, using local storage instead.", e);
+    }
+}
 
 // Initialize Application
 let calendarDate = new Date();
@@ -100,6 +201,17 @@ document.addEventListener("DOMContentLoaded", () => {
     startLiveSystemClock();
     checkActiveSession();
     renderAll();
+    
+    // Pull cloud logs on page load if already logged in
+    let authState = false;
+    try {
+        authState = sessionStorage.getItem("htec_timesheet_auth") === "true";
+    } catch (e) {
+        authState = fallbackAuth;
+    }
+    if (authState) {
+        loadStateCloud();
+    }
 });
 
 

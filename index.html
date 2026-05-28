@@ -54,8 +54,13 @@
                 </div>
             </div>
             
-            <div class="system-time-pill" id="live-time-display">
-                Thu, May 28, 2026 — 10:45 AM
+            <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                <div class="system-time-pill" id="live-time-display">
+                    Thu, May 28, 2026 — 10:45 AM
+                </div>
+                <button onclick="handleLogout()" style="padding: 0.45rem 1rem; font-family: var(--font-alt); font-size: 0.8rem; font-weight: 700; color: white; border: 1px solid rgba(255,255,255,0.25); background: rgba(0,0,0,0.15); border-radius: 30px; cursor: pointer; transition: all 0.2s;">
+                    Logout
+                </button>
             </div>
         </div>
     </header>
@@ -70,6 +75,7 @@
                     <p>Welcome to your dedicated working hours tracker. Use this secure client-side utility to log hours completed for Holy Trinity Episcopal Church. Review historical records, export standard CSV files, or print audit-ready timesheets for vestry payroll submission.</p>
                 </div>
                 <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                    <button class="btn-primary" id="save-progress-btn" onclick="saveStateCloud()" style="background: #1e4620; border-color: #1e4620; box-shadow: 0 4px 15px rgba(30, 70, 32, 0.15);">Save Progress</button>
                     <button class="btn-secondary" onclick="exportTimesheetCSV()">Export CSV Timesheet</button>
                     <button class="btn-gold" onclick="emailTreasurer()">Email Treasurer</button>
                     <button class="btn-primary" onclick="printTimesheet()">Print Timesheet</button>
