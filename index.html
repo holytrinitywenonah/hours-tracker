@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holy Trinity Wenonah - Parish Administrator Timesheet</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <div class="header-container">
+            <div class="brand">
+                <img src="https://images.squarespace-cdn.com/content/v1/58f9163b725e2543105f893c/1500487299244-JM79GEHPH22A5X46U0ZH/Huge+logo+-bw-small.png" alt="Holy Trinity Logo" class="brand-logo-img">
+                <div class="brand-text">
+                    <h1>Holy Trinity Wenonah</h1>
+                    <p>Parish Administrator Timesheet Portal</p>
+                </div>
+            </div>
+            
+            <div class="system-time-pill" id="live-time-display">
+                Thu, May 28, 2026 — 10:45 AM
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        
+        <!-- Welcome Card -->
+        <div class="glass-card welcome-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem;">
+                <div>
+                    <h2>Dedicated Timesheet Console</h2>
+                    <p>Welcome to your dedicated working hours tracker. Use this secure client-side utility to log hours completed for Holy Trinity Episcopal Church. Review historical records, export standard CSV files, or print audit-ready timesheets for vestry payroll submission.</p>
+                </div>
+                <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                    <button class="btn-secondary" onclick="exportTimesheetCSV()">Export CSV Timesheet</button>
+                    <button class="btn-gold" onclick="emailTreasurer()">Email Treasurer</button>
+                    <button class="btn-primary" onclick="printTimesheet()">Print Timesheet</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Layout Grid -->
+        <div class="dashboard-grid">
+            
+            <!-- COLUMN 1: LIVE CLOCK CONSOLE -->
+            <div class="glass-card clock-console-card">
+                <div class="card-header">
+                    <h3>Interactive Time Clock</h3>
+                    <div class="clock-status-pill" id="clock-status-display">
+                        <span class="status-dot"></span> 
+                        <span id="clock-status-text">Clocked Out</span>
+                    </div>
+                </div>
+
+                <div class="clock-timer-display">
+                    <div id="clock-timer">00:00:00</div>
+                    <div id="clock-session-details">No active session currently running</div>
+                </div>
+
+                <!-- Completed Tasks input drawer -->
+                <div id="clock-notes-group" class="notes-drawer">
+                    <label for="clock-notes-input">Active Work Details / Completed Tasks</label>
+                    <textarea id="clock-notes-input" placeholder="Describe the tasks you are currently working on... (e.g., Prepared Sunday pew bulletins, coordinated volunteer rosters)"></textarea>
+                </div>
+
+                <button class="btn-primary" id="clock-action-btn" onclick="toggleClockSession()">
+                    Start Active Session
+                </button>
+            </div>
+
+            <!-- COLUMN 2: WEEKLY BUDGET METRICS -->
+            <div class="glass-card progress-gauge-card">
+                <h3>Weekly Progress Metrics</h3>
+                <p class="section-subtext">Monday - Sunday Schedule Cycle</p>
+
+                <!-- SVG Progress Ring Gauge -->
+                <div class="svg-gauge-container">
+                    <svg width="160" height="160" viewBox="0 0 160 160">
+                        <circle cx="80" cy="80" r="66" stroke="var(--border-color)" stroke-width="12" fill="transparent" />
+                        <circle cx="80" cy="80" r="66" stroke="var(--accent-gold)" stroke-width="12" fill="transparent"
+                                stroke-dasharray="415" stroke-dashoffset="415" stroke-linecap="round" id="weekly-gauge-circle" />
+                    </svg>
+                    <div class="gauge-overlay-text">
+                        <span id="weekly-gauge-percent">0%</span>
+                        <span class="gauge-sublabel">Hours Logged</span>
+                    </div>
+                </div>
+
+                <div class="progress-details">
+                    <span id="weekly-hours-display">0.0h</span> worked of <span class="target-hours">10.0h</span> standard weekly target
+                </div>
+            </div>
+
+            <!-- COLUMN 3: MANUAL LOGGER & MONTHLY SUMMARY -->
+            <div class="glass-card manual-logger-card">
+                <h3>Retroactive Log Entry</h3>
+                <p class="section-subtext">Submit completed hours after the fact</p>
+
+                <form id="manual-hours-form" onsubmit="addManualHoursLog(event)">
+                    <div class="manual-date-group" style="margin-bottom: 0.75rem;">
+                        <div class="input-group">
+                            <label for="manual-date">Date of Work</label>
+                            <input type="date" id="manual-date" required>
+                        </div>
+                    </div>
+                    <div class="form-grid-times" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                        <div class="input-group">
+                            <label for="manual-start">Start Time</label>
+                            <input type="time" id="manual-start" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="manual-end">End Time</label>
+                            <input type="time" id="manual-end" required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="manual-notes">Tasks Log / Activity Description</label>
+                        <textarea id="manual-notes" placeholder="Specify tasks completed (e.g. Uploaded Weekly Podcast, processed parish email newsletter)" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        Log Manual Entry
+                    </button>
+                </form>
+
+                <div class="monthly-summary-bar">
+                    <span>This Month's Cumulative Total:</span>
+                    <strong id="monthly-hours-display">0.0 hrs</strong>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TIMESHEET LOG REGISTRY -->
+        <div class="glass-card timesheet-table-card" style="margin-bottom: 1.75rem;">
+            <div class="timesheet-header-row">
+                <h3>Timesheet Log Registry</h3>
+                
+                <div class="filter-actions-row">
+                    <input type="text" id="timesheet-search" placeholder="Search tasks..." oninput="renderTimesheetTable(); renderTimesheetCalendar();">
+                    
+                    <select id="timesheet-filter" onchange="renderTimesheetTable()">
+                        <option value="all">Display All Logs</option>
+                        <option value="week">Current Week</option>
+                        <option value="month">Current Month</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-scroll-wrapper">
+                <table class="timesheet-data-table">
+                    <thead>
+                        <tr>
+                            <th>Service Date</th>
+                            <th>Active Hours Range</th>
+                            <th style="text-align:center;">Total Hours</th>
+                            <th>Description of Tasks Completed and Parish Support Details</th>
+                            <th style="text-align:center;">Log Method</th>
+                            <th style="text-align:center;">Action Commands</th>
+                        </tr>
+                    </thead>
+                    <tbody id="timesheet-table-body">
+                        <!-- Populated dynamically via app.js -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TIMESHEET CALENDAR VIEW -->
+        <div class="glass-card calendar-card" style="margin-bottom: 1.75rem;">
+            <div class="timesheet-header-row" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <h3>Interactive Monthly Calendar</h3>
+                    <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); background:rgba(0,0,0,0.03); padding:0.15rem 0.45rem; border-radius:4px; margin-left:0.25rem;">Visual Audit View</span>
+                </div>
+                
+                <!-- Month Scroll Navigation Controls -->
+                <div style="display:flex; align-items:center; gap:0.5rem; background:var(--bg-base); padding:0.25rem 0.5rem; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+                    <button class="slot-sub-btn" onclick="adjustCalendarPeriod(-1)" style="padding:0.3rem 0.6rem; font-size:0.75rem;">Prev</button>
+                    <span id="calendar-month-label" style="font-family:var(--font-alt); font-size:0.9rem; font-weight:700; min-width:120px; text-align:center; color:var(--accent-gold);">May 2026</span>
+                    <button class="slot-sub-btn" onclick="adjustCalendarPeriod(1)" style="padding:0.3rem 0.6rem; font-size:0.75rem;">Next</button>
+                </div>
+            </div>
+
+            <!-- Calendar Month Day Matrix Grid -->
+            <div class="calendar-grid-wrapper" style="overflow-x:auto;">
+                <div>
+                    <!-- Headers (Sun-Sat) -->
+                    <div class="calendar-weekday-headers" style="display:grid; grid-template-columns:repeat(7, 1fr); text-align:center; font-weight:700; font-family:var(--font-alt); font-size:0.78rem; text-transform:uppercase; color:var(--accent-gold); border-bottom:1px solid var(--border-color); padding-bottom:0.5rem; margin-bottom:0.5rem; letter-spacing:0.05em;">
+                        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                    </div>
+                    
+                    <!-- Days Grid container -->
+                    <div id="calendar-days-grid" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:6px;">
+                        <!-- Rendered dynamically in app.js -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day details modal overlay -->
+            <div id="calendar-day-details" class="glass-card" style="display:none; border-left:4px solid var(--accent-gold); margin-top:1.25rem; background:rgba(197, 160, 89, 0.02); animation:slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                <!-- Populated dynamically via JS when a day cell is clicked -->
+            </div>
+        </div>
+
+
+
+
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div>Holy Trinity Episcopal Church • 11 N. Monroe Ave, Wenonah, NJ 08090</div>
+            <div>Parish Administration timesheet portal. Built securely for browser local storage caching.</div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
