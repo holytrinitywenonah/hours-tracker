@@ -38,10 +38,17 @@ let state = {
 };
 
 let hoursTimerInterval = null;
+let fallbackAuth = false;
 
 // Authentication gate checker
 function checkAuthenticationState() {
-    const authState = sessionStorage.getItem("htec_timesheet_auth") === "true";
+    let authState = false;
+    try {
+        authState = sessionStorage.getItem("htec_timesheet_auth") === "true";
+    } catch (e) {
+        authState = fallbackAuth;
+    }
+    
     const loginScreen = document.getElementById("login-screen");
     const appContent = document.getElementById("app-content");
     
@@ -56,24 +63,31 @@ function checkAuthenticationState() {
 
 // Authentication login submission handler
 window.handleLoginSubmit = function(event) {
-    event.preventDefault();
+    if (event) event.preventDefault();
     const usernameInput = document.getElementById("login-username");
     const passwordInput = document.getElementById("login-password");
     const errorMsg = document.getElementById("login-error");
     
-    if (!usernameInput || !passwordInput) return;
+    if (!usernameInput || !passwordInput) return false;
     
     const user = usernameInput.value.trim();
     const pass = passwordInput.value;
     
     if (user === "admin" && pass === "W2rd0fG0dHTEC08090!") {
-        sessionStorage.setItem("htec_timesheet_auth", "true");
+        try {
+            sessionStorage.setItem("htec_timesheet_auth", "true");
+        } catch (e) {
+            console.warn("sessionStorage not accessible; falling back to in-memory auth.");
+        }
+        fallbackAuth = true;
         if (errorMsg) errorMsg.style.display = "none";
         usernameInput.value = "";
         passwordInput.value = "";
         checkAuthenticationState();
+        return true;
     } else {
         if (errorMsg) errorMsg.style.display = "block";
+        return false;
     }
 };
 
